@@ -25,7 +25,7 @@ const utils = {
 
     viewUpdate(field, text){
         const elements = document.getElementsByClassName(field);
-
+        console.log(field, text);
         for (let i = 0; i < elements.length; i++){
             elements[i].innerText = text;
         }
@@ -84,7 +84,7 @@ const utils = {
         });
     },
 
-    removeClassNameFromCells(userName){
+    removeClassNameFromCells(){
         const classNames = ["login", "repos", "followers", "forks", "stargazers"];
         const table = document.getElementById("log");
         classNames.forEach(function(className, index){
@@ -167,7 +167,7 @@ function prepareReposFields(repos){ // create return object and a function to se
                 }
 
                 graphData = utils.prepareGraphData(controlDateArr, graphData, new Date(repo.pushed_at));
-                repoActivity = utils.getRepoActivity(controlDateArr[6], new Date(repo.pushed_at), repo.name) || repoActivity;
+                repoActivity = utils.getRepoActivity(controlDateArr[6], new Date(repo.pushed_at), repo.name) || "No recent repo activity";
             }
             else{
                 forks++;
@@ -175,6 +175,8 @@ function prepareReposFields(repos){ // create return object and a function to se
         });
 
     }
+
+    console.log(languages)
 
     return {
         repoData: [
