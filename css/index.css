@@ -271,7 +271,7 @@
         overflow: hidden;
     }
 
-    #repoActivity {
+    #repo-activity {
         max-width: 100%;
         max-height: 12px;
         text-overflow: ellipsis;

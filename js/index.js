@@ -1,15 +1,3 @@
-let git_user = document.getElementById("username");
-let nick = document.getElementById("nick");
-let git_pic = document.getElementById("git-pic");
-let octocat = document.getElementById("octocat");
-let tableMap = [];
-
-function updateInnerHTML(keyMap){
-    for(let key in keyMap) {
-        document.getElementById(key).innerHTML = keyMap[key];
-    }
-}
-
 function httpGet(theUrl){
     return new Promise(function(resolve, reject) {
         let xmlHttp = new XMLHttpRequest();
@@ -24,34 +12,52 @@ function httpGet(theUrl){
     })
 }
 
+let git_user = document.getElementById("username");
+let nick = document.getElementById("nick");
+let git_pic = document.getElementById("git-pic");
+let octocat = document.getElementById("octocat");
+
+let tableMap = [];
+
+// kümeler functions, belli görevler, solid 
+function updateInnerText(keyMap){
+    for(let key in keyMap) {
+        document.getElementById(key).innerText = keyMap[key];
+    }
+}
+
+
+
 function isGreaterThanThousand(data){
     if(data < 1000){
-        return data
+        return data;
     }
-    let bolum = data / 1000;
-    return "" + bolum.toFixed(1) + "k"
+    const bolum = data / 1000;
+    return "" + bolum.toFixed(1) + "k"; //use templete literals
 }
 
 function deleteRow(id){
-    var a = document.getElementById(id);
+    const a = document.getElementById(id);
     if(a){
         a.remove();
     }
 }
 
-function addRowToTable(data){ //example
-    let table = document.getElementById("log");
-    let row = table.insertRow(1);
+function addRowToTable(data){ //example noktalı virgüller !! //table updater, => row adder => data updater => style updater
+    const table = document.getElementById("log");
+    const row = table.insertRow(1);
     row.style.backgroundColor = data.bgColor;
     if(data.bgColor !== "#E6E6FA"){
         row.classList.add("dontClick");
     }
     row.id = "table-row-" + data.nick;
-    let arrData = ["<img src=" + data.git_pic + ">", data.nick, data.repos, data.forks, data.followers, data.stargazers, data.count]
-    let arr = []
-    for(let i = 0; i < 7; i++) {
-        arr[i] = row.insertCell(i)
-        arr[i].innerHTML = arrData[i];
+    const arrData = [data.nick, data.repos, data.forks, data.followers, data.stargazers, data.count];
+    let arr = [];
+    a = row.insertCell(0);
+    a.innerHTML = "<img src=" + data.git_pic + ">";
+    for(let i = 0; i < 6; i++) {
+        arr[i] = row.insertCell(i+ 1);
+        arr[i].innerText = arrData[i];
     }
 }
 
@@ -63,7 +69,7 @@ function prepareDatas(data){
     for(i = 0; i < 7; i++){
         graphData[i] = 0;
         date[i] = new Date();
-        date[i].setDate(today.getDate() - ((i+1)*30))
+        date[i].setDate(today.getDate() - ((i+1)*30)) // sabitler constant
     }
     data.result.map(function(data){
         controlDate = new Date(data.pushed_at);
@@ -96,7 +102,7 @@ function prepareDatas(data){
     })
     
     return {
-        repoCount: isGreaterThanThousand(repoCount),
+        repoCount: isGreaterThanThousand(repoCount), //converter function ! named
         forkCount: isGreaterThanThousand(forkCount),
         stargazersCount: isGreaterThanThousand(stargazersCount),
         languagesString,
@@ -105,11 +111,12 @@ function prepareDatas(data){
     };
 }
 
-function createNewBadge(data) {
-    $(function() {
-        $('.bar').sparkline(data.graph, {type: 'bar', barColor: 'green'});
-    })
-    var par = {
+function createNewBadge(data) { //updateBadge !! named
+        $(function() {
+            $('.bar').sparkline(data.graph, {type: 'bar', barColor: 'green'});
+        });
+    
+    let par = {
         repos: data.repos,
         forks: data.forks,
         stargazers: data.stargazers,
@@ -121,10 +128,10 @@ function createNewBadge(data) {
     nick.href = data.nick_link;
     git_pic.src = data.git_pic;
 
-    updateInnerHTML(par);
+    updateInnerText(par);
 }
 
-function handle_git_user_name(init_user_name){
+function handle_git_user_name(init_user_name){ //camel case //var camel case //no dangle
     user_input = git_user.value;
     if(init_user_name !== undefined) {
         user_input = init_user_name;
@@ -134,13 +141,12 @@ function handle_git_user_name(init_user_name){
         user_input = "facebook";
     }
     
-    let githubApiUsers = "https://api.github.com/users/" + user_input;
+    let githubApiUsers = "https://api.github.com/users/" + user_input; //url to variable
     let githubApiRepos = "https://api.github.com/users/" + user_input + "/repos?per_page=100";
-    let req1 = httpGet(githubApiUsers);
-    let req2 = httpGet(githubApiRepos)
 
-    Promise.all([req1, req2])
+    Promise.all([httpGet(githubApiUsers), httpGet(githubApiRepos)])
     .then(function(data){
+        console.log(data);
         let tempData = {
             nick: user_input,
             nick_link: "#",
@@ -190,7 +196,7 @@ function handle_git_user_name(init_user_name){
 
         deleteRow("table-row-"+tempData.nick);
         addRowToTable(tempData);
-        createNewBadge(tempData)
+        createNewBadge(tempData);
     })
 }
 
@@ -200,12 +206,11 @@ git_user.onkeyup = function() { //debounce
     timeout = setTimeout(handle_git_user_name, 720);
 }
 
-document.getElementById("coni").addEventListener("click", function(e){
+document.getElementById("coni").addEventListener("click", function(e){ //dom onload why needed ?
     //e.target is the clicked element!
     //if it was a list item
     if(e.target && e.target.nodeName === "TD" && (e.target.parentElement.classList.value !== "dontClick")){    
-        console.log(e.target.parentElement.classList.value )    
-        let target = e.target.parentElement.cells[1].innerHTML;
+        let target = e.target.parentElement.cells[1].innerText;
         
         handle_git_user_name(target);
     }
